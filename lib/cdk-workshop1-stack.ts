@@ -1,6 +1,8 @@
 import cdk = require('@aws-cdk/core');
 import lambda = require('@aws-cdk/aws-lambda');
 import apigw = require('@aws-cdk/aws-apigateway');
+import { HitCounter } from './hitcounter';
+import { Table } from '@aws-cdk/aws-dynamodb';
 
 export class CdkWorkshop1Stack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -14,6 +16,15 @@ export class CdkWorkshop1Stack extends cdk.Stack {
     });
     new apigw.LambdaRestApi(this, 'Endpoint', {
       handler: hello
+    });
+
+    const helloWithCounter = new HitCounter(this, 'HelloHitCounter', {
+      downstream: hello
+    });
+
+    // defines an API Gateway REST API resource backed by our "hello" function.
+    new apigw.LambdaRestApi(this, 'HitcounterEndpoint', {
+      handler: helloWithCounter.handler
     });
   }
 }
